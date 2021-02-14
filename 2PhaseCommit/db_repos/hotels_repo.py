@@ -1,3 +1,6 @@
+import string
+import random
+
 import psycopg2
 from psycopg2._psycopg import connection
 
@@ -27,21 +30,26 @@ class HotelsRepo:
         cursor = self.connection.cursor()
         cursor.execute("""
             INSERT INTO hotels.hotel_bookings (client_name, hotel_name, arrival, departure) 
-            VALUES(%s, %s, %s, %s, %s)""",
+            VALUES (%s, %s, %s, %s)""",
                        (client_name, hotel_name, arrival, departure))
         cursor.close()
 
     def start_transaction(self):
-        xid = self.connection.xid(1, 'transaction ID', 'connection1')
+        xid = self.connection.xid(random.randint(1, 10000), self.get_random_string(), self.get_random_string())
         self.connection.tpc_begin(xid)
         return xid
 
     def prepare(self):
         self.connection.tpc_prepare()
 
-    def rollback(self, xid):
-        self.connection.tpc_rollback(xid)
+    def rollback(self):
+        self.connection.tpc_rollback()
 
-    def commit(self, xid):
-        self.connection.tpc_commit(xid)
+    def commit(self):
+        self.connection.tpc_commit()
+
+    def get_random_string(self, len_param=10):
+        letters = string.ascii_letters
+        result_str = ''.join(random.choice(letters) for i in range(len_param))
+        return result_str
 

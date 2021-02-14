@@ -1,38 +1,43 @@
-import string
 import random
+import string
 
 import psycopg2
 from psycopg2._psycopg import connection
 
 
-class AirlinesRepo:
+class AccountsRepo:
     def __init__(self):
         self.connection: connection = psycopg2.connect(host="localhost",
-                                                       database="2PC_DB1",
+                                                       database="2PC_DB3",
                                                        user="danylokiral",
                                                        password="")
 
         with self.connection.cursor() as cursor:
-            cursor.execute("""create schema if not exists airlines;
-                            create table if not exists airlines.fly_bookings (
-                                booking_id serial primary key,
+            cursor.execute("""create schema if not exists banks;
+                            create table if not exists banks.accounts (
+                                account_id serial primary key,
                                 client_name varchar(255),
-                                fly_number varchar(20),
-                                from_airport varchar(3),
-                                to_airport varchar(3),
-                                fly_date date
+                                amount NUMERIC(11,2) CHECK (amount >= 0),
+                                unique(client_name)
                               );
+                            insert into banks.accounts (client_name, amount)
+                            values ('Danylo Kiral', 2000) 
+                            ON CONFLICT DO NOTHING;
                             """)
             cursor.close()
 
         self.connection.commit()
 
-    def insert(self, client_name, fly_number, from_airport, to_airport, fly_date):
+    def decrease_account_amount(self, client_name, decrease_by):
         cursor = self.connection.cursor()
         cursor.execute("""
-            INSERT INTO airlines.fly_bookings (client_name, fly_number, from_airport, to_airport, fly_date) 
-            VALUES(%s, %s, %s, %s, %s)""",
-                       (client_name, fly_number, from_airport, to_airport, fly_date))
+            do $$
+            begin
+                update banks.accounts set amount = amount - %s where client_name = %s;
+                if not found then raise exception 'User not found';
+                end if;
+            end $$;""",
+                       (decrease_by, client_name))
         cursor.close()
 
     def start_transaction(self):
@@ -53,5 +58,3 @@ class AirlinesRepo:
         letters = string.ascii_letters
         result_str = ''.join(random.choice(letters) for i in range(len_param))
         return result_str
-
-
