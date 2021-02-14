@@ -14,13 +14,13 @@ class AirlinesRepo:
 
         with self.connection.cursor() as cursor:
             cursor.execute("""create schema if not exists airlines;
-                            create table if not exists airlines.fly_bookings (
+                            create table if not exists airlines.flights_bookings (
                                 booking_id serial primary key,
                                 client_name varchar(255),
-                                fly_number varchar(20),
+                                flight_number varchar(20),
                                 from_airport varchar(3),
                                 to_airport varchar(3),
-                                fly_date date
+                                flight_date date
                               );
                             """)
             cursor.close()
@@ -30,8 +30,8 @@ class AirlinesRepo:
     def insert(self, client_name, fly_number, from_airport, to_airport, fly_date):
         cursor = self.connection.cursor()
         cursor.execute("""
-            INSERT INTO airlines.fly_bookings (client_name, fly_number, from_airport, to_airport, fly_date) 
-            VALUES(%s, %s, %s, %s, %s)""",
+            insert into airlines.flights_bookings (client_name, flight_number, from_airport, to_airport, flight_date) 
+            values (%s, %s, %s, %s, %s)""",
                        (client_name, fly_number, from_airport, to_airport, fly_date))
         cursor.close()
 

@@ -6,23 +6,23 @@ from psycopg2._psycopg import connection
 
 
 class AccountsRepo:
-    def __init__(self):
+    def __init__(self, initial_account_name, initial_amount):
         self.connection: connection = psycopg2.connect(host="localhost",
                                                        database="2PC_DB3",
                                                        user="danylokiral",
                                                        password="")
 
         with self.connection.cursor() as cursor:
-            cursor.execute("""create schema if not exists banks;
+            cursor.execute(f"""create schema if not exists banks;
                             create table if not exists banks.accounts (
                                 account_id serial primary key,
                                 client_name varchar(255),
-                                amount NUMERIC(11,2) CHECK (amount >= 0),
+                                amount numeric(11,2) check (amount >= 0),
                                 unique(client_name)
                               );
                             insert into banks.accounts (client_name, amount)
-                            values ('Danylo Kiral', 2000) 
-                            ON CONFLICT DO NOTHING;
+                            values ('{initial_account_name}', {initial_amount}) 
+                            on conflict (client_name) do update set amount = excluded.amount;
                             """)
             cursor.close()
 

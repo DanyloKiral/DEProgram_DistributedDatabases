@@ -29,8 +29,8 @@ class HotelsRepo:
     def insert(self, client_name, hotel_name, arrival, departure):
         cursor = self.connection.cursor()
         cursor.execute("""
-            INSERT INTO hotels.hotel_bookings (client_name, hotel_name, arrival, departure) 
-            VALUES (%s, %s, %s, %s)""",
+            insert into hotels.hotel_bookings (client_name, hotel_name, arrival, departure) 
+            values (%s, %s, %s, %s)""",
                        (client_name, hotel_name, arrival, departure))
         cursor.close()
 
